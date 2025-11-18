@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:football_news/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'dart:convert';
+import 'package:football_news/screens/menu.dart';
+
+
+
 
 class NewsFormPage extends StatefulWidget {
   const NewsFormPage({super.key});
@@ -164,51 +171,43 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.indigo),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Berita berhasil disimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Judul: $_title'),
-                                    const SizedBox(height: 4),
-                                    Text('Isi: $_content'),
-                                    const SizedBox(height: 4),
-                                    Text('Kategori: $_category'),
-                                    const SizedBox(height: 4),
-                                    Text('Thumbnail: $_thumbnail'),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Unggulan: ${_isFeatured ? "Ya" : "Tidak"}',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context); // Tutup pop-up
-                                    _formKey.currentState!
-                                        .reset(); // Reset form
-                                    setState(() {
-                                      // Reset juga variabel yang bukan dari field langsung
-                                      _isFeatured = false;
-                                      _category = 'update';
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        final request = context.watch<CookieRequest>();   // ⬅️ aman & sesuai PBP
+
+                        final response = await request.postJson(
+                          "http://127.0.0.1:8000/create-flutter/",
+                          jsonEncode({
+                            "title": _title,
+                            "content": _content,
+                            "thumbnail": _thumbnail,
+                            "category": _category,
+                            "is_featured": _isFeatured,
+                          }),
                         );
+
+                        if (context.mounted) {
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("News successfully saved!")),
+                            );
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyHomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Something went wrong, please try again."),
+                              ),
+                            );
+                          }
+                        }
                       }
                     },
+
+
                     child: const Text(
                       "Save",
                       style: TextStyle(color: Colors.white),

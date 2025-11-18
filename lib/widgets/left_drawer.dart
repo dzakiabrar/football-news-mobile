@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:football_news/screens/menu.dart';
 import 'package:football_news/pages/news_form_page.dart'; // ✅ impor halaman NewsFormPage
+import 'package:football_news/screens/news_entry_list.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -45,6 +46,10 @@ class LeftDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) => MyHomePage()),
               );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NewsEntryListPage()),
+              );
             },
           ),
           // 🔹 Routing ke NewsFormPage
@@ -63,3 +68,5 @@ class LeftDrawer extends StatelessWidget {
     );
   }
 }
+
+
